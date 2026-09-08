@@ -1,0 +1,9 @@
+{
+  "name": "hundred-days",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "100 games in 100 days: the calendar.",
+  "scripts": { "start": "node server.js", "add": "node tools/add-day.mjs" },
+  "engines": { "node": ">=22" }
+}

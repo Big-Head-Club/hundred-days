@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>100 games in 100 days</title>
+<meta name="description" content="One game a day, one short a day. Mack's hundred days, with how many people played each one.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#faf9f6;--fg:#1a1916;--dim:#7a756c;--faint:#c9c4ba;--line:#e6e2da;--card:#ffffff;--accent:#f2812f;--today:#f2812f;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.18);
+}
+@media (prefers-color-scheme: dark){:root{--bg:#161513;--fg:#ece8e0;--dim:#9a948a;--faint:#3a3732;--line:#2a2823;--card:#1f1d1a;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -12px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+header{max-width:1240px;margin:0 auto;padding:36px 20px 8px}
+h1{font-size:clamp(22px,3.4vw,34px);font-weight:600;letter-spacing:-.02em;margin:0}
+.sub{color:var(--dim);margin:6px 0 0;font-size:14px}
+.sub b{color:var(--fg);font-weight:500}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:12px;margin-top:14px}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--faint)}
+.legend .l-today::before{background:var(--today)}
+.legend .l-plays::before{background:transparent;border:1.5px solid var(--dim);width:6px;height:6px}
+main{max-width:1240px;margin:0 auto;padding:12px 20px 80px}
+
+/* desktop: weeks as rows, like a calendar */
+.dow{display:none}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.cell{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:150px;padding:10px 10px 8px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.cell:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.cell.empty{cursor:default;background:transparent;border-style:dashed}
+.cell.empty:hover{transform:none;box-shadow:none}
+.cell.future{opacity:.55}
+.cell.today{border-color:var(--today);box-shadow:0 0 0 2px var(--today) inset}
+.cell.pad{visibility:hidden}
+.top{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--dim)}
+.top .dom{font-weight:600;color:var(--fg);font-size:13px}
+.cell.today .top .dom{color:var(--today)}
+.top .mon{font-weight:500;margin-left:5px;color:var(--dim)}
+.top .n{font-variant-numeric:tabular-nums}
+.plate{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;background:var(--faint);display:block}
+.name{font-size:13px;font-weight:500;line-height:1.25;letter-spacing:.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.meta .vid{width:14px;height:14px;opacity:.8}
+.cell.empty .name{color:var(--faint);font-weight:400}
+
+/* mobile: one column, a list you scroll */
+@media (max-width:820px){
+  header{padding:26px 16px 4px}
+  main{padding:8px 12px 80px}
+  .grid{display:flex;flex-direction:column;gap:8px}
+  .cell.pad{display:none}
+  .cell{flex-direction:row;align-items:center;min-height:0;padding:10px 12px;gap:12px}
+  .cell.empty{padding:8px 12px}
+  .cell .top{flex-direction:column;align-items:flex-start;gap:0;min-width:56px}
+  .cell .top .dom{font-size:20px;line-height:1.1}
+  .cell .top .mon{margin:0;font-size:11px}
+  .cell .top .n{font-size:11px}
+  .plate{width:72px;aspect-ratio:4/3;flex:none}
+  .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .meta{margin-top:0}
+}
+@media (min-width:821px){
+  .dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:0 4px 8px}
+  .body{display:contents}
+}
+
+/* the day sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .15s}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%);width:min(560px,calc(100% - 24px));max-height:calc(100% - 40px);overflow:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:20px 22px 22px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+.sheet.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.sheet .x{position:absolute;right:12px;top:10px;border:0;background:transparent;color:var(--dim);font-size:22px;cursor:pointer;padding:6px 10px;border-radius:8px}
+.sheet .x:hover{background:var(--line)}
+.sheet .kicker{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.sheet h2{font-size:22px;margin:4px 0 2px;font-weight:600;letter-spacing:-.01em}
+.sheet .by{color:var(--dim);font-size:13px;margin-bottom:14px}
+.sheet .big{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--faint);display:block}
+.stats{display:flex;gap:18px;margin:14px 0 6px;flex-wrap:wrap}
+.stats div{font-size:12px;color:var(--dim)}
+.stats b{display:block;font-size:20px;font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:10px 16px;border-radius:10px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn:hover{border-color:var(--dim)}
+.video{margin-top:14px;display:none}
+.video.on{display:block}
+.video .frame{position:relative;width:min(100%,320px);aspect-ratio:9/16;margin:0 auto;border-radius:12px;overflow:hidden;background:#000}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tags{color:var(--dim);font-size:12px;margin-top:10px}
+.foot{max-width:1240px;margin:0 auto;padding:0 20px 40px;color:var(--dim);font-size:12px}
+.foot a{color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">100 games in 100 days</h1>
+  <p class="sub" id="sub">loading…</p>
+  <div class="legend"><span class="l-today">today</span><span class="l-plays">plays this week, from the arcade</span></div>
+</header>
+<main>
+  <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
+  <div class="grid" id="grid"></div>
+</main>
+<p class="foot">Plays are people who actually played, or runs where the game counts them. Crawlers never count. <a href="__ARCADE__/">Every game, ranked</a>.</p>
+
+<div class="sheet-bg" id="bg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <button class="x" id="close" aria-label="Close">×</button>
+  <div class="kicker" id="s-kicker"></div>
+  <h2 id="s-name"></h2>
+  <div class="by" id="s-by"></div>
+  <img class="big" id="s-plate" alt="">
+  <div class="stats" id="s-stats"></div>
+  <div class="tags" id="s-tags"></div>
+  <div class="actions" id="s-actions"></div>
+  <div class="video" id="s-video"><div class="frame"></div></div>
+</div>
+
+<script defer src="__ARCADE__/t.js"></script>
+<script>
+(async function () {
+  var ARCADE = '__ARCADE__';
+  var $ = function (id) { return document.getElementById(id); };
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  var [days, feed] = await Promise.all([fetch('/days.json').then(r => r.json()), fetch('/games.json').then(r => r.json())]);
+  var games = {}; (feed.games || []).forEach(function (g) { games[g.slug] = g; });
+  var bySlot = {}; (days.days || []).forEach(function (d) { bySlot[d.day] = d; });
+
+  // Dates as YYYY-MM-DD in local time; the challenge runs on Mack's calendar, not UTC's.
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  var start = parse(days.start), today = ymd(new Date());
+  var startDow = (start.getDay() + 6) % 7;            // Monday = 0
+  var total = 100;
+  var todayIdx = Math.round((parse(today) - start) / 864e5);
+  var dayNo = Math.min(total, Math.max(0, todayIdx + 1));
+  var filled = (days.days || []).length;
+  $('title').textContent = days.title || '100 games in 100 days';
+  $('sub').innerHTML = 'Mack · started ' + MONTHS[start.getMonth()] + ' ' + start.getDate() + ', ' + start.getFullYear() + ' · <b>day ' + dayNo + ' of ' + total + '</b>' + (filled ? ' · ' + filled + ' shipped' : '');
+
+  function ytId(u) { var m = String(u || '').match(/(?:shorts\/|v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/); return m ? m[1] : ''; }
+  function n(v) { return (v || 0).toLocaleString(); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function plays(g) { return g && g.plays ? g.plays.week : 0; }
+
+  var grid = $('grid'), html = '';
+  for (var p = 0; p < startDow; p++) html += '<div class="cell pad"></div>';
+  for (var i = 0; i < total; i++) {
+    var d = new Date(start); d.setDate(start.getDate() + i);
+    var key = ymd(d), slot = bySlot[key], g = slot && games[slot.slug];
+    var cls = 'cell' + (key === today ? ' today' : '') + (key > today ? ' future' : '') + (!slot ? ' empty' : '');
+    var first = d.getDate() === 1 || i === 0;
+    html += '<div class="' + cls + '" data-day="' + key + '" data-i="' + (i + 1) + '">' +
+      '<div class="top"><span><span class="dom">' + d.getDate() + '</span>' + (first ? '<span class="mon">' + MON3[d.getMonth()] + '</span>' : '') + '</span><span class="n">' + (i + 1) + '</span></div>' +
+      '<div class="body">' +
+      (slot
+        ? '<img class="plate" loading="lazy" src="' + ARCADE + '/plates/' + esc(slot.slug) + '" alt="">' +
+          '<div class="name">' + esc(g ? g.name : slot.slug) + '</div>' +
+          '<div class="meta"><span>' + (g ? n(plays(g)) + (g.plays.by === 'runs' ? ' runs' : ' played') : '') + '</span>' +
+          (slot.video ? '<svg class="vid" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' : '') + '</div>'
+        : '<div class="name">' + (key > today ? '' : (key === today ? 'today’s game, soon' : '')) + '</div>') +
+      '</div></div>';
+  }
+  grid.innerHTML = html;
+
+  // the sheet
+  var bg = $('bg'), sheet = $('sheet');
+  function open(key) {
+    var slot = bySlot[key]; if (!slot) return;
+    var g = games[slot.slug] || {}, i = Math.round((parse(key) - start) / 864e5) + 1, d = parse(key);
+    $('s-kicker').textContent = 'Day ' + i + ' · ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
+    $('s-name').textContent = g.name || slot.slug;
+    $('s-by').textContent = (g.designers && g.designers.length ? 'by ' + g.designers.join(', ') : '') + (g.status && g.status !== 'live' ? ' · ' + g.status : '');
+    $('s-plate').src = ARCADE + '/plates/' + slot.slug;
+    var pl = g.plays || {};
+    $('s-stats').innerHTML =
+      '<div><b>' + n(pl.week) + '</b>' + (pl.by === 'runs' ? 'runs this week' : 'played this week') + '</div>' +
+      '<div><b>' + n(pl.d7) + '</b>visitors this week</div>' +
+      '<div><b>' + n(pl.all) + '</b>visitors ever</div>';
+    $('s-tags').textContent = (g.tags || []).join(' · ');
+    var acts = '';
+    if (g.url) acts += '<a class="btn primary" href="' + esc(g.url) + '" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Play</a>';
+    if (slot.video) acts += '<button class="btn" id="s-watch">Watch the short</button><a class="btn" href="' + esc(slot.video) + '" target="_blank" rel="noopener">YouTube</a>';
+    $('s-actions').innerHTML = acts;
+    var v = $('s-video'); v.classList.remove('on'); v.querySelector('.frame').innerHTML = '';
+    var w = $('s-watch');
+    if (w) w.onclick = function () {
+      var id = ytId(slot.video);
+      v.querySelector('.frame').innerHTML = '<iframe src="https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="the short"></iframe>';
+      v.classList.add('on'); w.style.display = 'none';
+      window.tally && tally('watch', { day: i, slug: slot.slug });
+    };
+    bg.classList.add('on'); sheet.classList.add('on');
+    history.replaceState(null, '', '#' + key);
+    window.tally && tally('open', { day: i, slug: slot.slug });
+  }
+  function close() { bg.classList.remove('on'); sheet.classList.remove('on'); $('s-video').querySelector('.frame').innerHTML = ''; history.replaceState(null, '', location.pathname); }
+  grid.addEventListener('click', function (e) { var c = e.target.closest('.cell'); if (c && c.dataset.day) open(c.dataset.day); });
+  bg.onclick = close; $('close').onclick = close;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  if (/^#\d{4}-\d{2}-\d{2}$/.test(location.hash)) open(location.hash.slice(1));
+
+  // on a phone, land on today
+  if (matchMedia('(max-width:820px)').matches) {
+    var t = grid.querySelector('.cell.today'); if (t) setTimeout(function () { t.scrollIntoView({ block: 'center' }); }, 50);
+  }
+})();
+</script>
+</body>
+</html>
