@@ -49,7 +49,7 @@ http.createServer(async (req, res) => {
     if (p === '/health') return send(res, 200, 'ok', 'text/plain');
     if (p === '/days.json') return send(res, 200, await days(), 'application/json; charset=utf-8', 30);
     if (p === '/games.json') return send(res, 200, await games(), 'application/json; charset=utf-8', 30);
-    if (p === '/' || p === '/index.html') return send(res, 200, page.replace('__ARCADE__', ARCADE), 'text/html; charset=utf-8', 60);
+    if (p === '/' || p === '/index.html') return send(res, 200, page.replaceAll('__ARCADE__', ARCADE), 'text/html; charset=utf-8', 60);
     send(res, 404, 'not found', 'text/plain');
   } catch (e) {
     console.error(e);

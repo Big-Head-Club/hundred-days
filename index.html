@@ -177,7 +177,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 20px 80px}
     var g = games[slot.slug] || {}, i = Math.round((parse(key) - start) / 864e5) + 1, d = parse(key);
     $('s-kicker').textContent = 'Day ' + i + ' · ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
     $('s-name').textContent = g.name || slot.slug;
-    $('s-by').textContent = (g.designers && g.designers.length ? 'by ' + g.designers.join(', ') : '') + (g.status && g.status !== 'live' ? ' · ' + g.status : '');
+    $('s-by').textContent = (g.designers && g.designers.length ? 'by ' + g.designers.join(', ') : '') + (g.status === 'down' ? ' · down right now' : '');
     $('s-plate').src = ARCADE + '/plates/' + slot.slug;
     var pl = g.plays || {};
     $('s-stats').innerHTML =
