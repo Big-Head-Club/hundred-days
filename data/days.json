@@ -25,7 +25,8 @@
     {
       "day": "2026-09-11",
       "slug": "the-perfect-song",
-      "video": "https://www.youtube.com/shorts/8nHopVSBGds"
+      "video": "https://www.youtube.com/watch?v=8ZOIfJuBt_4",
+      "shape": "wide"
     },
     {
       "day": "2026-09-12",
@@ -51,6 +52,12 @@
       "day": "2026-09-16",
       "slug": "arena-push",
       "video": "https://www.youtube.com/shorts/DfN8Mz56-y0"
+    },
+    {
+      "day": "2026-09-17",
+      "slug": "log-run",
+      "video": "https://www.youtube.com/watch?v=tivOGQpQtOg",
+      "shape": "wide"
     }
   ]
 }
