@@ -1,12 +1,13 @@
 ---
 name: hundred-days
-description: Add a game and its YouTube short to the Big Head Club "100 games in 100 days" calendar at bhc-hundred-days.fly.dev. Use when the user pastes a game link and a YouTube Shorts link, with or without any other words, or when they ask to add, swap or fix a day, a game or a video on the calendar or the hundred days site.
+description: Add a game and its YouTube video to the Big Head Club "100 games in 100 days" calendar at bhc-hundred-days.fly.dev. Use when the user pastes a game link and a YouTube link (a Short or a regular video), with or without any other words, or when they ask to add, swap or fix a day, a game or a video on the calendar or the hundred days site.
 ---
 
 # Add a day to the 100 days calendar
 
 The calendar at https://bhc-hundred-days.fly.dev shows one Big Head Club game
-per day, with its YouTube short. The schedule is `data/days.json` in
+per day, with Mack's YouTube video for it: sometimes a Short, sometimes a
+regular video. The schedule is `data/days.json` in
 `~/Desktop/stuff/hundred-days` (github.com/Big-Head-Club/hundred-days). The
 site re-reads that file from GitHub every minute, so a push publishes the day.
 Never deploy for a new day.
@@ -15,7 +16,7 @@ Every game on the calendar must be registered with the arcade
 (https://bhc-arcade.fly.dev), because the calendar takes each game's name,
 picture and play count from the arcade's feed.
 
-The usual request is two links, a game and a short, sometimes with a day
+The usual request is two links, a game and a video, sometimes with a day
 ("yesterday's game", "Friday"). This is routine: do it without asking, then
 report. Several pairs at once means several days; handle each pair the same way.
 
@@ -69,12 +70,16 @@ the user is adding a video that arrived late (same day, same slug, new video).
 ## 4. Write, commit, push
 
 ```sh
-node tools/add-day.mjs <YYYY-MM-DD> <slug> <short url>
+node tools/add-day.mjs <YYYY-MM-DD> <slug> '<video url>'
 git commit -qam "Day <n>: <NAME>" && git push -q
 ```
 
+Quote the video link: zsh reads the `?` in `watch?v=` as a wildcard.
+
 `add-day.mjs` replaces any existing entry for that date, so the same command
-swaps a game or adds a late video. It refuses a slug the arcade doesn't know
+swaps a game, adds a late video or replaces a video. It asks YouTube whether
+the link is a Short and records `"shape": "wide"` when it isn't, so the page
+gives regular videos a 16:9 player. It refuses a slug the arcade doesn't know
 and a link the page can't embed. End the commit message with the attribution
 lines this session asks for.
 
