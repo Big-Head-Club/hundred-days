@@ -11,6 +11,7 @@ Live: https://bhc-hundred-days.fly.dev
 Edit `data/days.json` on GitHub, or locally:
 
 ```
+node tools/lookup.mjs https://thegame.xyz     # its arcade slug, and the last two weeks with weekdays
 node tools/add-day.mjs 2026-09-08 <slug> https://www.youtube.com/shorts/...
 git commit -am "Day 2" && git push
 ```
@@ -18,6 +19,10 @@ git commit -am "Day 2" && git push
 The site re-reads the file from GitHub every minute. No deploy needed. The
 slug is the game's slug in the arcade; register the game there first if it
 is new. The video is optional and can be added later.
+
+With Claude Code, paste the game link and the short link. `skill/SKILL.md`
+teaches it the steps; install it with
+`mkdir -p ~/.claude/skills/hundred-days && cp skill/SKILL.md ~/.claude/skills/hundred-days/`.
 
 ## Running it
 
