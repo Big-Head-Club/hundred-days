@@ -9,7 +9,8 @@ The calendar at https://bhc-hundred-days.fly.dev shows one Big Head Club game
 per day, with Mack's YouTube video for it: sometimes a Short, sometimes a
 regular video. The schedule is `data/days.json` in
 `~/Desktop/stuff/hundred-days` (github.com/Big-Head-Club/hundred-days). The
-site re-reads that file from GitHub every minute, so a push publishes the day.
+site re-reads that file from GitHub, so a push publishes the day within a few
+minutes.
 Never deploy for a new day.
 
 Every game on the calendar must be registered with the arcade
@@ -89,8 +90,9 @@ lines this session asks for.
 curl -s https://bhc-hundred-days.fly.dev/days.json | grep -c '"day"'
 ```
 
-Poll for up to two minutes until the new date shows in
-`https://bhc-hundred-days.fly.dev/days.json`.
+Poll for up to six minutes until the new date shows in
+`https://bhc-hundred-days.fly.dev/days.json`. GitHub caches the raw file for
+five minutes, so a slow first check is normal, not a failure.
 
 ## 6. Report
 

@@ -23,4 +23,4 @@ data.days = data.days.filter((d) => d.day !== day);
 data.days.push({ day, slug, ...(video ? { video } : {}), ...(shape ? { shape } : {}) });
 data.days.sort((a, b) => a.day.localeCompare(b.day));
 writeFileSync(f, JSON.stringify(data, null, 2) + '\n');
-console.log(`${day}: ${slug}${video ? ` + ${shape === 'wide' ? 'video' : 'short'}` : ''}${was ? ` (replaced ${was.slug}${was.video && was.video !== video ? ' and its video' : ''})` : ''}. Commit and push; the site picks it up within a minute.`);
+console.log(`${day}: ${slug}${video ? ` + ${shape === 'wide' ? 'video' : 'short'}` : ''}${was ? ` (replaced ${was.slug}${was.video && was.video !== video ? ' and its video' : ''})` : ''}. Commit and push; the site shows it within about five minutes.`);

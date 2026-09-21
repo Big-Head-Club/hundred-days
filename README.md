@@ -16,7 +16,7 @@ node tools/add-day.mjs 2026-09-08 <slug> 'https://www.youtube.com/shorts/...'   
 git commit -am "Day 2" && git push
 ```
 
-The site re-reads the file from GitHub every minute. No deploy needed. The
+The site re-reads the file from GitHub; a push shows within about five minutes. No deploy needed. The
 slug is the game's slug in the arcade; register the game there first if it
 is new. The video is optional and can be added later.
 
