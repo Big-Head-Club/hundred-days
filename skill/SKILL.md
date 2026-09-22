@@ -21,6 +21,30 @@ The usual request is two links, a game and a video, sometimes with a day
 ("yesterday's game", "Friday"). This is routine: do it without asking, then
 report. Several pairs at once means several days; handle each pair the same way.
 
+## 0. No links? Find the day's game from Mack's videos
+
+When the user asks for a day's game without links ("figure out yesterday's
+game"), list Mack's latest uploads (channel @MoPMack):
+
+```sh
+curl -s "https://www.youtube.com/feeds/videos.xml?channel_id=UCpAioHiYlsnmSgNvN795kZQ" \
+  | python3 -c "import re,sys; x=sys.stdin.read(); [print(re.search(r'<published>(.*?)<',e)[1][:16], re.search(r'href=\"(.*?)\"',e)[1], '|', re.search(r'<title>(.*?)<',e)[1]) for e in re.findall(r'<entry>(.*?)</entry>',x,re.S)[:10]]"
+```
+
+Times are UTC; Mack posts a game's video on the evening (US Eastern) of its
+day. Many shorts are chatter with no game. A title like "Day 15/100" settles
+the day. Otherwise read the transcript to the end, because Mack often names
+the game only in the last lines:
+
+```sh
+yt-dlp -q --skip-download --write-auto-subs --sub-langs en --sub-format vtt -o "%(id)s.%(ext)s" '<video url>'
+```
+
+Then find the site (try `<name>.xyz`) and the repo (newest repos:
+`gh repo list Big-Head-Club --limit 400 --json name,createdAt`). The repo name
+is often a working title, not the game's name. Carry on from step 1 with the
+site's URL and say in the report how you matched them.
+
 ## 1. Pull and look up
 
 ```sh
@@ -47,9 +71,10 @@ take. Pick `category` from the game's own description. The arcade's GitHub
 webhook adds the game within seconds of the push. Run the lookup again until it
 shows the slug.
 
-The calendar needs only the registry entry, not the tag. If the game's host
-doesn't redeploy on push (some Railway services aren't linked to GitHub), say
-so in the report instead of deploying by hand.
+The calendar needs only the registry entry, not the tag. Mack deploys many
+games from his own Railway account, which this machine can't reach, so the tag
+may go live only when he next deploys. Say so in the report instead of
+deploying by hand.
 
 Ask the user only if no repo in the org matches.
 
