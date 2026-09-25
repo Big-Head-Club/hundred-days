@@ -101,7 +101,7 @@ main{max-width:1240px;margin:0 auto;padding:12px 20px 80px}
 <header>
   <h1 id="title">100 games in 100 days</h1>
   <p class="sub" id="sub">loading…</p>
-  <div class="legend"><span class="l-today">today</span><span class="l-plays">plays this week, from the arcade</span></div>
+  <div class="legend"><span class="l-today">today</span><span class="l-plays">plays this month, from the arcade</span></div>
 </header>
 <main>
   <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
@@ -182,8 +182,8 @@ main{max-width:1240px;margin:0 auto;padding:12px 20px 80px}
     $('s-plate').src = ARCADE + '/plates/' + slot.slug;
     var pl = g.plays || {};
     $('s-stats').innerHTML =
-      '<div><b>' + n(pl.week) + '</b>' + (pl.by === 'runs' ? 'runs this week' : 'played this week') + '</div>' +
-      '<div><b>' + n(pl.d7) + '</b>visitors this week</div>' +
+      '<div><b>' + n(pl.month != null ? pl.month : pl.week) + '</b>' + (pl.by === 'runs' ? 'runs this month' : 'played this month') + '</div>' +
+      '<div><b>' + n(pl.d30) + '</b>visitors this month</div>' +
       '<div><b>' + n(pl.all) + '</b>visitors ever</div>';
     $('s-tags').textContent = (g.tags || []).join(' · ');
     var acts = '';
