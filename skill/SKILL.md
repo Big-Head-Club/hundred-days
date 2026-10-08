@@ -21,29 +21,33 @@ The usual request is two links, a game and a video, sometimes with a day
 ("yesterday's game", "Friday"). This is routine: do it without asking, then
 report. Several pairs at once means several days; handle each pair the same way.
 
-## 0. Mack's list is the canon
+## 0. Mack's list is the canon, but it does not carry dates
 
-**https://gameaday.xyz is the authority on which game is which day.** It is Mack's
-own page, and when it disagrees with the arcade, a video, a game's `started` date
-or this calendar, it wins. Read it before filling a gap or settling an argument:
+**https://gameaday.xyz is the authority on which games exist and in what order.**
+It is Mack's own page, and on the question of what a game is called and where it
+sits in the run, it beats the arcade, the videos and this calendar.
 
 ```sh
 curl -s https://gameaday.xyz/ | python3 -c "
-import re,sys,datetime
-h=sys.stdin.read(); start=datetime.date(2026,9,7)
-for n,slug,name in re.findall(r'data-started=\"run-(\d+)\"[\s\S]{0,200}?data-slug=\"([^\"]+)\"[\s\S]{0,200}?aria-label=\"([^\"]+)\"', h):
-    print((start+datetime.timedelta(days=int(n)-1)).isoformat(), 'day', n, slug, '|', name)"
+import re,sys
+h=sys.stdin.read()
+for n,slug,name in re.findall(r'data-started=\"run-(\d+)\"[\s\S]{0,400}?data-slug=\"([^\"]+)\"[\s\S]{0,300}?nameplate\">([^<]+)<', h):
+    print(int(n), slug, '|', name)"
 ```
 
-Each cart carries `data-started="run-NNN"`, and run NNN is day NNN: day 1 is
-2026-09-07, so the date is 2026-09-07 plus NNN-1.
+His markup changes — that selector has already been rewritten once, when
+`aria-label` went away — so if it returns nothing, print the markup around the
+first `data-started` and fix the pattern rather than assuming the run is empty.
 
-Two traps. His slugs are not always the arcade's — his `crosswalk` is the arcade's
-`crossword-runner`, the same game under two names — so compare by game, not by
-string. And a game on his list may be `hidden: true` in its repo, which keeps it
-off the arcade and makes `add-day.mjs` refuse it; clear the flag, let the webhook
-pick it up, then add the day.
+**Run number is not day number.** It was, up to No. 29, and then it stopped: he
+skipped a day and inserted an older game. Never compute a date from `run-NNN`.
+Date a game from, in this order:
 
+1. the short that announces it, by the evening it went up (US Eastern);
+2. its place in his order, between two games whose dates you already know;
+3. its `started` in the arcade, which is often the day before release.
+
+## 1. No links? Find the day's game from Mack's videos
 ## 1. No links? Find the day's game from Mack's videos
 
 When the user asks for a day's game without links ("figure out yesterday's
@@ -105,7 +109,7 @@ Ask the user only if no repo in the org matches.
 
 In this order:
 
-0. gameaday.xyz already places the game: use that day, whatever anything else says.
+0. gameaday.xyz fixes the order; the short that announces the game fixes the date.
 1. The user named a day: use it. "Yesterday" and "today" are relative to the
    `<- today` row. A weekday name means the most recent one on or before today.
    A date is a date.
