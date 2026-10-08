@@ -142,6 +142,15 @@
     {
       "day": "2026-10-05",
       "slug": "ctf-tactics"
+    },
+    {
+      "day": "2026-10-06",
+      "slug": "flock"
+    },
+    {
+      "day": "2026-10-07",
+      "slug": "bee-hive",
+      "video": "https://www.youtube.com/shorts/1olW_ZsiDeo"
     }
   ]
 }
