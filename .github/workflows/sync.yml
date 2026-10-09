@@ -1,0 +1,90 @@
+name: Fill the calendar
+
+# Once a day, compare Mack's run at gameaday.xyz with the calendar. Days the
+# script can prove get committed; anything it cannot are listed in an issue for
+# a person to settle. It never guesses a date.
+
+on:
+  schedule:
+    - cron: '0 14 * * *'        # 10am US Eastern, after Mack's evening posts
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Look at the run
+        id: sync
+        run: |
+          set -o pipefail
+          node tools/sync.mjs --apply 2>&1 | tee report.txt
+          {
+            echo 'report<<EOF'
+            cat report.txt
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit what it could prove
+        run: |
+          if git diff --quiet -- data/days.json; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git config user.name "hundred-days bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/days.json
+          git commit -m "Fill the calendar from Mack's run
+
+          $(cat report.txt)"
+          git push
+
+      - name: Say what it could not settle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = `${{ steps.sync.outputs.report }}`;
+            const open = report.split('\n').filter((l) => /days free|not in the arcade|markup has moved/.test(l));
+            const title = 'Calendar: days that need a person';
+            const existing = (await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: [],
+            })).data.find((i) => i.title === title);
+
+            if (!open.length) {
+              if (existing) {
+                await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: existing.number, body: 'All settled — the calendar matches the run.' });
+                await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: existing.number, state: 'closed' });
+              }
+              return;
+            }
+
+            const body = [
+              'These are on Mack&apos;s run at https://gameaday.xyz but the date cannot be proved from a short or from the gap around them.',
+              '',
+              '```',
+              ...open,
+              '```',
+              '',
+              'To settle one: `node tools/add-day.mjs YYYY-MM-DD <slug> [short url]`, then push.',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body });
+            }
+
+      - name: Put the report in the run summary
+        if: always()
+        run: cat report.txt >> "$GITHUB_STEP_SUMMARY" || true

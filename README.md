@@ -24,6 +24,25 @@ With Claude Code, paste the game link and the video link. `skill/SKILL.md`
 teaches it the steps; install it with
 `mkdir -p ~/.claude/skills/hundred-days && cp skill/SKILL.md ~/.claude/skills/hundred-days/`.
 
+## The daily fill
+
+A GitHub Action runs `tools/sync.mjs --apply` every morning. It compares Mack's
+run at https://gameaday.xyz with this calendar and fills any day it can prove:
+either a short whose title names the game (dated by the evening it went up) or a
+single free day between two dated neighbours. It never guesses. Anything it
+cannot settle goes in an issue titled "Calendar: days that need a person", and
+that issue closes itself once the days are filled.
+
+Run it by hand any time:
+
+```
+node tools/sync.mjs            # say what is missing, change nothing
+node tools/sync.mjs --apply    # fill what it can prove
+```
+
+Run numbers on his page are not day numbers — that held to No. 29 and then he
+skipped a day and inserted an older game.
+
 ## Running it
 
 ```
